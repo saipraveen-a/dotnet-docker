@@ -1,0 +1,36 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: windows-latest
+
+    steps:
+    - name: 'Checkout Github Action' 
+      uses: actions/checkout@master
+    
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - uses: azure/docker-login@v1
+      with:
+        login-server: unifiedserviceacr.azurecr.io
+        username: ${{ secrets.acr_unifiedserviceacr_username }}
+        password: ${{ secrets.acr_unifiedserviceacr_password }}
+    
+    - name: Build and push image to ACR
+      working-directory: samples/aspnetapp
+      id: build-image
+      run: |
+        docker build . -f  "Dockerfile" -t unifiedserviceacr.azurecr.io/aspnetapp-img:${{ github.sha }}
+        docker push unifiedserviceacr.azurecr.io/aspnetapp-img:${{ github.sha }}
+      
+    - uses: azure/webapps-deploy@v2
+      with:
+        app-name: gua-service-win
+        images: unifiedserviceacr.azurecr.io/aspnetapp-img:${{ github.sha }}
