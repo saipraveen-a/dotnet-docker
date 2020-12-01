@@ -27,7 +27,7 @@ jobs:
       working-directory: samples/aspnetapp
       id: build-image
       run: |
-        docker build . -f  "Dockerfile" -t unifiedserviceacr.azurecr.io/aspnetapp-img:${{ github.sha }}
+        docker build . -f  "Dockerfile.nanoserver-x64" -t unifiedserviceacr.azurecr.io/aspnetapp-img:${{ github.sha }}
         docker push unifiedserviceacr.azurecr.io/aspnetapp-img:${{ github.sha }}
       
     - uses: azure/webapps-deploy@v2
